@@ -1,6 +1,6 @@
 # Provenance and interpretation limits
 
-Documentation check: 2026-09-08. Data snapshot label: 2026-07-05. Dataset first published: 2026-07-28. This update changes documentation only. both data files retain their original SHA-256 hashes.
+Documentation check: 2026-09-08. Data snapshot label: 2026-07-05. Dataset first published: 2026-07-28. This update changes documentation only. Both data files retain their original SHA-256 hashes.
 
 ## Scope
 
@@ -23,6 +23,6 @@ Use the current [USITC HTS](https://hts.usitc.gov/) and its [official informatio
 
 ## Citation and related work
 
-Cite Supplymo and this repository, retaining the snapshot date. See CITATION.cff. Related dated studies: https://supplymo.com/research. The live sourcing tool is https://supplymo.com/hs-code-import-duty-checker. CC BY 4.0 applies as recorded in LICENSE. no warranty or customs outcome is provided.
+Cite Supplymo and this repository, retaining the snapshot date. See CITATION.cff. Related dated studies: https://supplymo.com/research. The live sourcing tool is https://supplymo.com/hs-code-import-duty-checker. CC BY 4.0 applies as recorded in LICENSE. No warranty or customs outcome is provided.
 
 The translated README changes have not received independent native-speaker review.

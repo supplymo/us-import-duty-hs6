@@ -4,7 +4,7 @@
 
 ## Historical snapshot
 
-The data date is **2026-07-05**. This documentation was checked on 2026-09-08. the data values were not refreshed. `effective_percent` contains only the modeled MFN and Section 301 components. It is not total duty or a current payable rate. Other measures or charges may apply. A null MFN value is not zero. 20 records have no simple MFN percentage. Use the current [USITC HTS](https://hts.usitc.gov/) for the applicable national tariff line. See [provenance and limitations](PROVENANCE.md).
+The data date is **2026-07-05**. This documentation was checked on 2026-09-08. The data values were not refreshed. `effective_percent` contains only the modeled MFN and Section 301 components. It is not total duty or a current payable rate. Other measures or charges may apply. A null MFN value is not zero. 20 records have no simple MFN percentage. Use the current [USITC HTS](https://hts.usitc.gov/) for the applicable national tariff line. See [provenance and limitations](PROVENANCE.md).
 
 **English** · [中文](README.zh-CN.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Français](README.fr.md)
 
@@ -13,7 +13,7 @@ chapters that ecommerce importers actually buy: apparel, footwear, bags,
 electronics, small appliances, furniture, lighting, toys, hardware and
 housewares.
 
-Each record contains historical MFN and modeled Section 301 components. The field names are preserved for compatibility. the limitations below define their scope.
+Each record contains historical MFN and modeled Section 301 components. The field names are preserved for compatibility. The limitations below define their scope.
 
 | | |
 |---|---|
@@ -22,7 +22,7 @@ Each record contains historical MFN and modeled Section 301 components. The fiel
 | Reporter / partner | United States / China |
 | Snapshot date | 2026-07-05 |
 | Formats | CSV, JSON |
-| Licence | [CC BY 4.0](LICENSE) , free to use, attribution required |
+| Licence | [CC BY 4.0](LICENSE), free to use, attribution required |
 
 ## ⚠️ Read this before using the numbers
 
@@ -55,8 +55,8 @@ data/us-import-duty-hs6-consumer-goods.json   # same data + chapter map + metada
 | `chapter` | string | First 2 digits (HS chapter) |
 | `description` | string | Official HS description |
 | `mfn_percent` | number \| null | Base MFN ad-valorem rate, % (`null` = no simple ad-valorem rate at this level, e.g. specific or compound duties) |
-| `effective_percent` | number \| null | Modeled MFN + Section 301 component in the historical snapshot. not total payable duty. A missing MFN component makes the total incomplete. |
-| `section301_extra_percent` | number \| null | Modeled Section 301 component. Zero and missing values are different. neither alone establishes a legal exemption. |
+| `effective_percent` | number \| null | Modeled MFN + Section 301 component in the historical snapshot. This is not total payable duty. A missing MFN component makes the total incomplete. |
+| `section301_extra_percent` | number \| null | Modeled Section 301 component. Zero and missing values are different. Neither alone establishes a legal exemption. |
 | `tariff_lines_aggregated` | integer | Number of source tariff lines contributing to the aggregate. One line is not a guarantee of legal classification or a current rate. |
 
 ### Example
@@ -78,7 +78,7 @@ df = pd.read_csv("data/us-import-duty-hs6-consumer-goods.csv", dtype={"hs6": str
 # Snapshot rows with zero MFN and a positive modeled Section 301 component
 df[(df.mfn_percent == 0) & (df.section301_extra_percent > 0)]
 
-# Rows with one contributing source line. classification still requires checking
+# Rows with one contributing source line. Classification still requires checking
 df[df.tariff_lines_aggregated == 1]
 ```
 
@@ -109,10 +109,10 @@ actions are overlaid per tariff line, then aggregated to HS6: `mfn_percent` and
 
 ## Citing
 
-> Supplymo (2026). *US Import Duty by HS6 , Consumer Goods.*
+> Supplymo (2026). *US Import Duty by HS6: Consumer Goods.*
 > https://github.com/supplymo/us-import-duty-hs6
 
-If you build something with it we would like to see it , open an issue.
+If you build something with it we would like to see it, open an issue.
 
 ## Corrections
 
