@@ -1,5 +1,9 @@
 # Droits de douane US par HS6 — Biens de consommation (origine Chine)
 
+## Données historiques
+
+Date des données : **2026-07-05**. La documentation a été vérifiée le 2026-09-08 ; les valeurs n’ont pas été actualisées. `effective_percent` contient uniquement les composantes NPF et Section 301 du modèle, pas la totalité des droits ni le taux actuellement exigible. D’autres mesures ou frais peuvent s’appliquer. Une valeur NPF manquante ne vaut pas zéro ; 20 enregistrements n’ont pas de pourcentage NPF simple. Vérifiez la ligne tarifaire nationale applicable dans le [USITC HTS](https://hts.usitc.gov/) actuel. Voir la [provenance et les limites](PROVENANCE.md).
+
 [English](README.md) · [中文](README.zh-CN.md) · [Deutsch](README.de.md) · [Español](README.es.md) · **Français**
 
 Un jeu de données ouvert des **droits de douane à l'importation aux États-Unis
@@ -55,9 +59,9 @@ data/us-import-duty-hs6-consumer-goods.json   # mêmes données + table des chap
 | `chapter` | string | 2 premiers chiffres (chapitre HS) |
 | `description` | string | Libellé officiel HS |
 | `mfn_percent` | number \| null | Taux NPF ad valorem, % (`null` = pas de taux ad valorem simple à ce niveau, ex. droits spécifiques ou composés) |
-| `effective_percent` | number \| null | NPF + Section 301, % — référence pour une expédition d'origine chinoise |
-| `section301_extra_percent` | number \| null | Surtaxe Section 301 seule, % (`0`/`null` = hors liste 301) |
-| `tariff_lines_aggregated` | integer | Lignes tarifaires nationales derrière ce HS6. **`1` = exact, `>1` = moyenné** — vérifiez votre ligne |
+| `effective_percent` | number \| null | Composante historique NPF + Section 301 du modèle, et non le total exigible. Si la NPF manque, le total est incomplet. |
+| `section301_extra_percent` | number \| null | Composante Section 301 du modèle. Zéro et valeur manquante sont distincts ; aucun ne prouve à lui seul une exemption légale. |
+| `tariff_lines_aggregated` | integer | Nombre de lignes tarifaires sources agrégées. Une seule ligne ne garantit ni le classement légal ni un taux en vigueur. |
 
 ### Exemple
 
@@ -67,16 +71,7 @@ hs6,chapter,description,mfn_percent,effective_percent,section301_extra_percent,t
 611020,61,"Jerseys, pullovers, cardigans ... : Of cotton",10.8,18.3,7.5,2
 ```
 
-Première ligne : les autres meubles en bois n'ont **aucun droit NPF de base**,
-mais une expédition d'origine chinoise se calcule autour de **25 %** — toute la
-charge vient de la Section 301. C'est précisément pourquoi rechercher des
-catégories « sans droits de douane » induit gravement en erreur pour un
-sourcing en Chine.
-
-La seconde ligne est le cas inverse : la maille de coton supporte déjà 10,8 % de
-NPF, et la Section 301 ajoute 7,5 % par-dessus.
-
-Les deux sont des moyennes sur 2 lignes tarifaires (`tariff_lines_aggregated = 2`).
+Dans cet instantané historique, 940360 présente une composante NPF de 0 et une composante Section 301 de 25. Pour 611020, les valeurs sont 10,8 et 7,5. Chaque enregistrement agrège deux lignes tarifaires sources. Ces exemples expliquent les champs enregistrés sans constituer un calcul complet des droits en vigueur.
 
 ## Démarrage rapide
 
@@ -87,7 +82,7 @@ df = pd.read_csv("data/us-import-duty-hs6-consumer-goods.csv", dtype={"hs6": str
 # Codes où toute la charge vient de la Section 301
 df[(df.mfn_percent == 0) & (df.section301_extra_percent > 0)]
 
-# Uniquement les lignes exactes, sans moyenne
+# Enregistrements avec une ligne source ; classement à vérifier
 df[df.tariff_lines_aggregated == 1]
 ```
 
@@ -125,44 +120,9 @@ HTS vérifiée. Les corrections sont bienvenues et créditées.
 
 ## À propos de Supplymo
 
-[Supplymo](https://supplymo.com) est une équipe de sourcing basée à **Yiwu, en
-Chine** — la place de gros d'où part une grande partie des biens de consommation
-mondiaux. Nous sommes le côté chinois de la transaction : visites d'usines,
-vérification des annonces, contrôle de ce qu'est réellement un fournisseur, et
-inspection des marchandises avant expédition.
+[Supplymo](https://supplymo.com/) est basé à Yiwu, en Chine, et aide les petits vendeurs en ligne à examiner leurs décisions d’achat avant de payer un fournisseur. Il propose des [outils gratuits](https://supplymo.com/tools) et un [Product Check avec vérification humaine](https://supplymo.com/1688-sourcing-check).
 
-**Pourquoi nous disposons de ces données.** Les vendeurs nous posaient toujours
-la même question — « combien ça va me coûter, rendu chez moi ? » — et nous ne
-pouvions jamais répondre vite. Le prix unitaire est simple. Les droits ne le
-sont pas : ils dépendent du classement, de l'origine, et de la présence du code
-sur une liste Section 301. Nous avons fini par construire cette table pour nos
-propres devis, et il n'y avait aucune raison de la garder privée.
-
-**Ce que nous faisons**, volontairement séparé :
-
-- **Outils gratuits, sans inscription** — les vérifications que vous pouvez
-  faire vous-même avant de payer :
-  [code HS et droits](https://supplymo.com/hs-code-import-duty-checker),
-  [coût de revient rendu](https://supplymo.com/1688-landed-cost-calculator),
-  [CBM et chargement 3D de conteneur](https://supplymo.com/cbm-calculator),
-  [comparaison de transport](https://supplymo.com/shipping-cost-from-china),
-  [seuil de rentabilité du MOQ](https://supplymo.com/1688-moq-calculator),
-  [présélection du risque fournisseur](https://supplymo.com/1688-supplier-risk-check),
-  [Incoterms 2020](https://supplymo.com/incoterms) —
-  [les 12 outils](https://supplymo.com/tools).
-- **Product Check** — quand la décision demande un humain : vérification du
-  fournisseur et de l'annonce, décomposition des coûts, signaux de risque et une
-  recommandation claire (continuer, échantillonner, renégocier ou arrêter).
-
-**Notre rapport aux chiffres.** Tout ce que nous publions donne des estimations
-*plus ce qui reste à vérifier auprès des sources officielles*. Classement,
-taux, dédouanement et délais dépendent de la destination et de la marchandise
-précise. Nous ne promettons de chiffre fixe sur aucun de ces points, et nous
-pensons que les outils qui prétendent le contraire causent des dégâts réels :
-quelqu'un vire de l'argent en se fiant à un nombre qui n'a jamais été fiable.
-
-Exploité par **United Profit Import and Export Co., Ltd.**, Yiwu, Zhejiang,
-Chine. Contact : support@supplymo.com
+La [bibliothèque d’études](https://supplymo.com/research) précise les dates, les méthodes et les limites. Les observations sont séparées des hypothèses. Les paiements et la gestion des commandes nécessitent un devis approuvé. Exploitant : United Profit Import and Export Co., Ltd. Contact : support@supplymo.com.
 
 ### Versions locales
 

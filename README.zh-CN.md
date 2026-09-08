@@ -1,5 +1,9 @@
 # 美国 HS6 进口关税数据集 — 消费品章节(中国原产)
 
+## 历史快照
+
+数据日期为 **2026-07-05**。本次于 2026-09-08 校正文档，未更新税率数据。`effective_percent` 仅包含模型中的 MFN 与 Section 301 项，不代表完整税负或当前应缴税率；其他措施或费用可能适用。MFN 缺失不等于零，共 20 条记录没有简单的 MFN 百分比。请在 [USITC HTS](https://hts.usitc.gov/) 核对实际适用的完整税则行。详见 [来源与局限](PROVENANCE.md)。
+
 [English](README.md) · **中文** · [Deutsch](README.de.md) · [Español](README.es.md) · [Français](README.fr.md)
 
 一份 **HS6 层级的美国进口关税开放数据**,覆盖跨境电商真正会采购的品类:
@@ -45,9 +49,9 @@ data/us-import-duty-hs6-consumer-goods.json   # 同样数据 + 章节对照 + �
 | `chapter` | string | 前 2 位(HS 章) |
 | `description` | string | HS 官方品名描述 |
 | `mfn_percent` | number \| null | MFN 基础从价税率,%(`null` = 该层级无简单从价税率,如从量税或复合税) |
-| `effective_percent` | number \| null | MFN + Section 301,% —— 中国原产货物通常按此初筛 |
-| `section301_extra_percent` | number \| null | 仅 Section 301 加征部分,%(`0`/`null` = 不在 301 清单) |
-| `tariff_lines_aggregated` | integer | 该 HS6 下参与聚合的国家税则行数。**`1` = 精确值;`>1` = 均值**,需核实具体行 |
+| `effective_percent` | number \| null | 历史快照模型中的 MFN + Section 301 项，不是完整应缴税率。MFN 缺失时不能当作完整合计。 |
+| `section301_extra_percent` | number \| null | 模型中的 Section 301 项。零与缺失不同，均不能单独证明法律上的豁免。 |
+| `tariff_lines_aggregated` | integer | 参与聚合的源税则行数；仅一条来源也不保证商品归类或当前税率正确。 |
 
 ### 示例
 
@@ -57,12 +61,8 @@ hs6,chapter,description,mfn_percent,effective_percent,section301_extra_percent,t
 611020,61,"Jerseys, pullovers, cardigans ... : Of cotton",10.8,18.3,7.5,2
 ```
 
-第一行读作:其他木质家具**基础 MFN 税率为 0**,但中国原产货物实际按约 **25%** 初筛
-—— 全部来自 Section 301。这正说明用"免税品类"做选品研究,放在中国采购场景下会严重误导。
+在这份历史快照中，940360 的 MFN 项为 0，模型中的 Section 301 项为 25；611020 的对应值为 10.8 和 7.5。两条记录各聚合了两个源税则行。这些数字仅用于解释已有字段，不能当作当前进口货物的完整税负。
 
-第二行是相反的形态:棉针织衫本身有 10.8% 的 MFN,Section 301 再加 7.5%。
-
-两条都是 2 条税则行的均值(`tariff_lines_aggregated = 2`),用之前请核实你的具体行。
 
 ## 快速上手
 
@@ -108,36 +108,9 @@ HS6:`mfn_percent` 和 `effective_percent` 是该 HS6 下各国家税则行的均
 
 ## 关于 Supplymo
 
-[Supplymo](https://supplymo.com) 是一支在**中国义乌**的采购团队 ——
-全球相当比例的小商品从这里发出。我们是这笔交易的中国侧:
-跑工厂、核链接、查供应商到底是什么身份、出货前验货。
+[Supplymo](https://supplymo.com/) 位于中国义乌，帮助小型电商卖家在向供应商付款前检查采购信息。可以使用[免费工具](https://supplymo.com/tools)，或申请[人工复核的 Product Check](https://supplymo.com/1688-sourcing-check)。
 
-**我们为什么有这份数据。** 卖家反复问同一个问题——"这批货到岸到底要花多少钱?"
-——而我们每次都答不快。单价好算,关税不好算:它取决于归类、原产地,
-以及这个编码在不在 Section 301 清单上。后来我们为自己报价做了这张对照表,
-既然做了,没理由不公开。
-
-**我们做两件事**,并且刻意分得很清楚:
-
-- **免费工具,无需注册** —— 付款给供应商之前你自己就能跑的检查:
-  [HS 编码与进口关税](https://supplymo.com/hs-code-import-duty-checker)、
-  [到岸成本](https://supplymo.com/1688-landed-cost-calculator)、
-  [CBM 与 3D 集装箱装载](https://supplymo.com/cbm-calculator)、
-  [运输方式比较](https://supplymo.com/shipping-cost-from-china)、
-  [MOQ 盈亏平衡](https://supplymo.com/1688-moq-calculator)、
-  [供应商风险初筛](https://supplymo.com/1688-supplier-risk-check)、
-  [限制品筛查](https://supplymo.com/restricted-products-from-china-check)、
-  [Incoterms 2020](https://supplymo.com/incoterms) —— [共 12 个](https://supplymo.com/tools)。
-- **Product Check** —— 需要人来判断时:核验供应商与链接、拆解成本、
-  标出风险,并给出继续 / 先打样 / 重谈 / 停止的明确建议。
-
-**我们怎么对待数字。** 我们公开的一切都是**估算值 + 还需要用官方来源核实的部分**。
-归类、税率、清关结果、时效,都取决于目的国和具体货物。
-我们不对其中任何一项承诺固定数字——那些假装能承诺的工具会造成真实伤害:
-有人会照着一个本来就不可靠的数字把钱打出去。
-
-运营主体:**义乌联利进出口有限公司**(United Profit Import and Export Co., Ltd.),
-浙江义乌。联系:support@supplymo.com
+[研究库](https://supplymo.com/research)公开有日期、方法和局限的市场研究。观察事实与假设分开记录，供应商付款及履约另需确认报价。运营主体为 United Profit Import and Export Co., Ltd.。联系邮箱：support@supplymo.com。
 
 ### 各语言版本工具
 

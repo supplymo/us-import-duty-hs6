@@ -1,5 +1,9 @@
 # US-Einfuhrzoll nach HS6 — Konsumgüter (Ursprung China)
 
+## Historischer Datenstand
+
+Datenstand: **2026-07-05**. Die Dokumentation wurde am 2026-09-08 geprüft; die Datenwerte wurden nicht aktualisiert. `effective_percent` enthält nur die modellierten MFN- und Section-301-Komponenten, nicht sämtliche Abgaben oder den aktuell zahlbaren Zollsatz. Weitere Maßnahmen oder Gebühren können gelten. Ein fehlender MFN-Wert ist nicht null Prozent; 20 Datensätze enthalten keinen einfachen MFN-Prozentsatz. Die anwendbare nationale Tariflinie ist im aktuellen [USITC HTS](https://hts.usitc.gov/) zu prüfen. Siehe [Herkunft und Grenzen](PROVENANCE.md).
+
 [English](README.md) · [中文](README.zh-CN.md) · **Deutsch** · [Español](README.es.md) · [Français](README.fr.md)
 
 Ein offener Datensatz der **US-Einfuhrzollsätze auf HS6-Ebene** für genau die
@@ -54,9 +58,9 @@ data/us-import-duty-hs6-consumer-goods.json   # gleiche Daten + Kapitelübersich
 | `chapter` | string | Erste 2 Ziffern (HS-Kapitel) |
 | `description` | string | Offizielle HS-Warenbezeichnung |
 | `mfn_percent` | number \| null | MFN-Wertzollsatz in % (`null` = kein einfacher Wertzoll auf dieser Ebene, z. B. spezifische oder zusammengesetzte Zölle) |
-| `effective_percent` | number \| null | MFN + Section 301 in % — Richtwert für Sendungen chinesischen Ursprungs |
-| `section301_extra_percent` | number \| null | Nur der Section-301-Aufschlag in % (`0`/`null` = nicht auf einer 301-Liste) |
-| `tariff_lines_aggregated` | integer | Anzahl nationaler Tariflinien hinter diesem HS6. **`1` = exakt, `>1` = gemittelt** — konkrete Linie prüfen |
+| `effective_percent` | number \| null | Historische MFN- und Section-301-Komponente des Modells, nicht die gesamte Zollbelastung. Bei fehlendem MFN-Wert ist die Summe unvollständig. |
+| `section301_extra_percent` | number \| null | Modellierte Section-301-Komponente. Null und fehlende Werte sind zu unterscheiden; keiner dieser Werte belegt allein eine rechtliche Befreiung. |
+| `tariff_lines_aggregated` | integer | Anzahl der einbezogenen Quelltariflinien. Eine einzelne Linie garantiert weder die rechtliche Einreihung noch einen aktuellen Satz. |
 
 ### Beispiel
 
@@ -66,15 +70,7 @@ hs6,chapter,description,mfn_percent,effective_percent,section301_extra_percent,t
 611020,61,"Jerseys, pullovers, cardigans ... : Of cotton",10.8,18.3,7.5,2
 ```
 
-Erste Zeile: Andere Holzmöbel haben **keinen MFN-Grundzoll**, eine Sendung
-chinesischen Ursprungs wird aber mit rund **25 %** kalkuliert — die gesamte
-Belastung stammt aus Section 301. Genau deshalb führt Produktrecherche nach
-„zollfreien" Warengruppen bei China-Beschaffung in die Irre.
-
-Zweite Zeile ist der umgekehrte Fall: Baumwollstrickwaren tragen bereits 10,8 %
-MFN, Section 301 legt 7,5 % obendrauf.
-
-Beide sind Mittelwerte über 2 Tariflinien (`tariff_lines_aggregated = 2`).
+Im historischen Datensatz enthält 940360 einen MFN-Wert von 0 und eine modellierte Section-301-Komponente von 25. Bei 611020 lauten die Werte 10,8 und 7,5. Beide Datensätze fassen jeweils zwei Quelltariflinien zusammen. Die Beispiele erläutern die gespeicherten Felder und stellen keine vollständige aktuelle Zollberechnung dar.
 
 ## Schnellstart
 
@@ -85,7 +81,7 @@ df = pd.read_csv("data/us-import-duty-hs6-consumer-goods.csv", dtype={"hs6": str
 # Codes, bei denen die gesamte Belastung aus Section 301 stammt
 df[(df.mfn_percent == 0) & (df.section301_extra_percent > 0)]
 
-# Nur exakte Linien, keine Mittelwerte
+# Datensätze mit einer Quelltariflinie; Einreihung weiterhin prüfen
 df[df.tariff_lines_aggregated == 1]
 ```
 
@@ -124,44 +120,9 @@ HTS-Linie öffnen. Korrekturen sind willkommen und werden namentlich vermerkt.
 
 ## Über Supplymo
 
-[Supplymo](https://supplymo.com) ist ein Sourcing-Team in **Yiwu, China** — dem
-Großhandelszentrum, aus dem ein großer Teil der weltweiten Konsumgüter
-verschifft wird. Wir sind die China-Seite des Geschäfts: Fabrikbesuche,
-Prüfung von Angeboten, Verifizierung dessen, was ein Lieferant tatsächlich ist,
-und Warenkontrolle vor Versand.
+[Supplymo](https://supplymo.com/) sitzt in Yiwu, China, und unterstützt kleine E-Commerce-Händler bei Beschaffungsentscheidungen vor Lieferantenzahlungen. Verfügbar sind [kostenlose Werkzeuge](https://supplymo.com/tools) und ein [Product Check mit menschlicher Prüfung](https://supplymo.com/1688-sourcing-check).
 
-**Warum wir diese Daten haben.** Verkäufer stellten uns immer dieselbe Frage —
-„Was kostet mich das am Ende frei Haus?" — und wir konnten sie nie schnell
-beantworten. Der Stückpreis ist einfach. Der Zoll nicht: Er hängt von
-Einreihung, Ursprung und davon ab, ob der Code auf einer Section-301-Liste
-steht. Wir haben die Tabelle für unsere eigene Kalkulation gebaut — und es gab
-keinen Grund, sie nicht zu veröffentlichen.
-
-**Was wir tun**, bewusst klar getrennt:
-
-- **Kostenlose Tools, ohne Anmeldung** — die Prüfungen, die Sie vor der Zahlung
-  selbst durchführen können:
-  [HS-Code & Einfuhrzoll](https://supplymo.com/hs-code-import-duty-checker),
-  [Landed Cost](https://supplymo.com/1688-landed-cost-calculator),
-  [CBM & 3D-Containerauslastung](https://supplymo.com/cbm-calculator),
-  [Frachtvergleich](https://supplymo.com/shipping-cost-from-china),
-  [MOQ-Break-even](https://supplymo.com/1688-moq-calculator),
-  [Lieferanten-Risikoprüfung](https://supplymo.com/1688-supplier-risk-check),
-  [Incoterms 2020](https://supplymo.com/incoterms) —
-  [alle 12 Tools](https://supplymo.com/tools).
-- **Product Check** — wenn ein Mensch entscheiden muss: Lieferanten- und
-  Angebotsprüfung, Kostenaufschlüsselung, Risikohinweise und eine klare
-  Empfehlung (fortfahren, erst bemustern, nachverhandeln oder abbrechen).
-
-**Wie wir mit Zahlen umgehen.** Alles, was wir veröffentlichen, liefert
-Schätzwerte *plus das, was noch anhand offizieller Quellen zu prüfen ist*.
-Einreihung, Zollsätze, Abfertigung und Laufzeiten hängen vom Zielland und der
-konkreten Ware ab. Wir versprechen dabei keine festen Zahlen — Tools, die das
-vorgeben, richten realen Schaden an: Jemand überweist Geld auf Basis einer Zahl,
-die nie belastbar war.
-
-Betrieben von **United Profit Import and Export Co., Ltd.**, Yiwu, Zhejiang,
-China. Kontakt: support@supplymo.com
+Die [Studienbibliothek](https://supplymo.com/research) nennt Datenstand, Methode und Grenzen. Beobachtungen und Annahmen werden getrennt. Zahlungen und Auftragsabwicklung erfordern ein genehmigtes Angebot. Betreiber: United Profit Import and Export Co., Ltd. Kontakt: support@supplymo.com.
 
 ### Lokale Versionen
 
